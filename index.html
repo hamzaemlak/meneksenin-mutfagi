@@ -263,6 +263,11 @@
       font-weight: 600;
       font-size: 13px;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
     .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
 
@@ -347,16 +352,6 @@
       max-height: 88vh;
       overflow-y: auto;
     }
-    .ai-result-box {
-      background: #F4F8F5;
-      border: 1px solid var(--sage-light);
-      border-radius: 16px;
-      padding: 16px;
-      white-space: pre-line;
-      font-size: 14px;
-      line-height: 1.55;
-      margin-top: 14px;
-    }
     .divider {
       border: none;
       border-top: 1px solid var(--border-soft);
@@ -387,7 +382,7 @@
       <div class="featured-card">
         <span class="pill-badge">Günün önerisi</span>
         <h2>Bugün ne pişirsem?</h2>
-        <p>Evdeki malzemelerini söyle, önce kendi tarif defterine bakalım, sonra sana nefis fikirler önerelim.</p>
+        <p>Evdeki malzemelerini söyle, hem kendi tarif defterinden hem de şefin tarif havuzundan sana nefis yemekler bulalım.</p>
         <button class="cta-sage" onclick="goScreen('cook')">
           <span>Yemek önerilerini keşfet</span>
           <span>→</span>
@@ -481,7 +476,7 @@
     <!-- 4. BUGÜN NE PİŞİRSEM? -->
     <div id="screen-cook" class="screen">
       <h2 class="serif" style="font-style:italic; margin-bottom:6px;">Bugün Ne Pişirsem?</h2>
-      <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Malzemelerini seç veya yaz; önce kendi tarif defterine bakalım, ardından yapay zeka şefimiz senin için öneriler üretsin.</p>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Malzemelerini seç veya yaz; önce kendi tarif defterine bakalım, ardından şefin tarif havuzundan sana en uygun yemekleri listeledik.</p>
 
       <div class="card">
         <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Elimdeki Malzemeler:</label>
@@ -493,7 +488,7 @@
       </div>
 
       <div id="matched-own-recipes"></div>
-      <div id="ai-suggestion-area"></div>
+      <div id="chef-library-area"></div>
     </div>
 
     <!-- 5. HAFTALIK MENÜ -->
@@ -528,12 +523,9 @@
   <!-- Ayarlar ve Yedekleme Modalı -->
   <div id="settings-modal" class="modal" onclick="if(event.target===this) closeModal('settings-modal')">
     <div class="modal-content">
-      <h3 class="serif" style="margin-top:0;">Ayarlar ve Yedekleme</h3>
+      <h3 class="serif" style="margin-top:0;">Ayarlar ve Bulut Yedekleme</h3>
 
-      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">1. Yapay Zeka Şef (Gemini API Anahtarı)</label>
-      <input type="password" id="api-key-input" placeholder="AQ... veya AIzaSy... ile başlayan anahtar" />
-
-      <label style="font-size:13px; font-weight:600; display:block; margin:10px 0 4px;">2. Google E-Tablolar Otomatik Bulut Yedeği</label>
+      <label style="font-size:13px; font-weight:600; display:block; margin:10px 0 4px;">1. Google E-Tablolar Otomatik Bulut Yedeği</label>
       <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px;">Tariflerin ve listelerin otomatik olarak Google Drive tablosuna yedeklenmesi için Web Uygulaması linkini yapıştır:</p>
       <input type="url" id="cloud-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
 
@@ -546,7 +538,7 @@
 
       <hr class="divider" />
 
-      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">3. Dosya Olarak Yedekle / Geri Yükle</label>
+      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">2. Dosya Olarak Yedekle / Geri Yükle</label>
       <div style="display:flex; gap:8px;">
         <button class="btn-secondary" style="flex:1;" onclick="downloadBackup()">📥 Yedeği İndir</button>
         <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('backup-file-input').click()">📤 Yedek Yükle</button>
@@ -585,6 +577,100 @@
         source: "Kendi Tarifim",
         ingredients: ["500 gr tavuk göğsü", "300 gr kültür mantarı", "1 paket sıvı krema", "2 diş sarımsak", "2 yemek kaşığı sıvı yağ", "1 çay kaşığı karabiber"],
         steps: "Kuşbaşı doğranmış tavukları yüksek ateşte soteleyin. Dilimlenmiş mantarları ve sarımsağı ekleyip suyunu çekene kadar pişirin. Kremayı ve baharatları ekleyip 5 dakika daha kısık ateşte özleştirin."
+      }
+    ];
+
+    // KOTASIZ, İNTERNETSİZ ANINDA ÇALIŞAN ŞEF TARİF HAVUZU
+    const chefLibrary = [
+      {
+        id: 1001,
+        title: "Fırında Patatesli Tavuk Baget / Göğüs",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["500 gr tavuk", "3 adet patates", "2 adet domates", "1 adet soğan", "3 diş sarımsak", "1 yemek kaşığı salça", "3 yemek kaşığı sıvı yağ", "kekik, pul biber, tuz"],
+        steps: "Patatesleri elma dilimi doğrayın. Salça, yağ, rendelenmiş sarımsak ve baharatları karıştırıp tavuk ve patateslerle harmanlayın. Fırın tepsisine dizip üzerini domates dilimleriyle süsleyin ve 200 derecede 40 dakika pişirin."
+      },
+      {
+        id: 1002,
+        title: "Sebzeli Bulgur Pilavı (Meyhane Pilavı)",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["2 su bardağı pilavlık bulgur", "2 adet domates", "1 adet kuru soğan", "2 adet yeşil biber", "2 diş sarımsak", "1 yemek kaşığı tereyağı", "1 yemek kaşığı salça", "3.5 su bardağı sıcak su"],
+        steps: "Soğan ve biberleri tereyağında kavurun. Salça ve rendelenmiş domatesleri ekleyip 3 dakika pişirin. Yıkanmış bulguru ekleyip 2 dakika çevirin, sıcak suyunu ve tuzunu ekleyip kısık ateşte suyunu çekene kadar demlendirin."
+      },
+      {
+        id: 1003,
+        title: "Kıymalı Patates Oturtma",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["300 gr kıyma", "4 adet patates", "1 adet kuru soğan", "2 adet domates", "2 diş sarımsak", "1 yemek kaşığı salça", "sıvı yağ, karabiber, tuz"],
+        steps: "Halka doğranmış patatesleri az yağda hafifçe kızartıp tencere tabanına dizin. Ayrı tavada soğan, sarımsak ve kıymayı kavurup salça ve doğranmış domatesleri ekleyin. Kıymalı harcı patateslerin üzerine yayın, 1 su bardağı sıcak su ekleyip 20 dakika pişirin."
+      },
+      {
+        id: 1004,
+        title: "Karnıyarık (Fırında Hafif Usul)",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["4 adet patlıcan", "250 gr kıyma", "1 adet kuru soğan", "2 adet domates", "2 diş sarımsak", "1 yemek kaşığı salça", "zeytinyağı, tuz, karabiber"],
+        steps: "Alacalı soyulmuş patlıcanları yağlayıp fırında 20 dakika yumuşatın. Soğan, sarımsak, kıyma ve domatesle iç harcı kavurun. Patlıcanların ortasını yarıp harcı doldurun, salçalı sıcak su gezdirip 180 derece fırında 20 dakika daha pişirin."
+      },
+      {
+        id: 1005,
+        title: "Fırında Kabak Mücver",
+        category: "Hamur İşi & Kahvaltı",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["3 adet kabak", "2 adet yumurta", "4 yemek kaşığı un", "1 tutam dereotu", "100 gr beyaz peynir", "3 yemek kaşığı zeytinyağı", "tuz, karabiber"],
+        steps: "Kabakları rendeleyip suyunu iyice sıkın. Yumurta, un, ufalanmış peynir, ince kıyılmış dereotu ve zeytinyağını ekleyip karıştırın. Yağlı kağıt serili tepsiye yayıp 180 derecede üzeri kızarana kadar 30 dakika pişirin."
+      },
+      {
+        id: 1006,
+        title: "Domates Soslu Tavuk Sote",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["500 gr tavuk göğsü", "2 adet domates", "1 adet kuru soğan", "2 diş sarımsak", "2 yemek kaşığı zeytinyağı", "kekik, pul biber, tuz"],
+        steps: "Kuşbaşı tavukları yüksek ateşte mühürleyin. Yemeklik soğan ve sarımsağı ekleyip yumuşayana kadar soteleyin. Küp doğranmış domates ve baharatları ekleyip kapağı kapalı şekilde 15 dakika pişirin."
+      },
+      {
+        id: 1007,
+        title: "Kremalı Mantar Çorbası",
+        category: "Çorba",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["250 gr mantar", "1 adet kuru soğan", "1 paket krema", "2 yemek kaşığı un", "1 yemek kaşığı tereyağı", "4 su bardağı su", "karabiber, tuz"],
+        steps: "İnce doğranmış soğan ve mantarları tereyağında suyunu salıp çekene kadar kavurun. Unu ekleyip kokusu çıkana kadar çevirin. Suyu yavaş yavaş ekleyip kaynatın, son olarak kremayı ve karabiberi ekleyip 5 dakika daha kaynatın."
+      },
+      {
+        id: 1008,
+        title: "Menemen (Soğanlı / Soğansız)",
+        category: "Hamur İşi & Kahvaltı",
+        servings: 2,
+        source: "Şefin Önerisi",
+        ingredients: ["3 adet domates", "3 adet yumurta", "1 adet soğan", "2 adet yeşil biber", "2 yemek kaşığı zeytinyağı", "tuz, pul biber"],
+        steps: "Zeytinyağında doğranmış soğan ve biberleri yumuşatın. Kabuğu soyulmuş küp domatesleri ekleyip suyunu çekene kadar pişirin. Yumurtaları kırıp hafifçe karıştırarak kıvam alınca ocaktan alın."
+      },
+      {
+        id: 1009,
+        title: "Pirinçli Kabak Yemeği",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["3 adet kabak", "1 adet kuru soğan", "2 adet domates", "2 yemek kaşığı pirinç", "3 yemek kaşığı zeytinyağı", "dereotu, tuz"],
+        steps: "Soğanı zeytinyağında kavurun, yarım ay doğranmış kabakları ve domatesleri ekleyin. Yıkanmış pirinci ve 1 su bardağı sıcak suyu ilave edip kısık ateşte pirinçler yumuşayana kadar pişirin. Üzerine dereotu serpin."
+      },
+      {
+        id: 1010,
+        title: "İmam Bayıldı",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Şefin Önerisi",
+        ingredients: ["4 adet patlıcan", "2 adet kuru soğan", "3 adet domates", "4 diş sarımsak", "4 yemek kaşığı zeytinyağı", "1 çay kaşığı toz şeker", "tuz"],
+        steps: "Alacalı soyulan patlıcanları tavada hafifçe kızartın. Piyazlık doğranmış soğan, sarımsak ve domatesi zeytinyağında pişirin. Patlıcanların ortasını açıp harcı doldurun, yarım bardak su ve şeker ekleyip kısık ateşte 25 dakika pişirin."
       }
     ];
 
@@ -797,7 +883,7 @@
       }
 
       list.innerHTML = filtered.map(r => `
-        <div class="card" onclick="openRecipeModal(${r.id}, ${r.servings})" style="cursor:pointer;">
+        <div class="card" onclick="openRecipeModal(${r.id}, ${r.servings}, false)" style="cursor:pointer;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
               <span class="pill-badge" style="margin-bottom:4px;">${r.category} • ${r.servings} Kişilik</span>
@@ -819,11 +905,18 @@
       });
     }
 
-    function openRecipeModal(id, currentServings) {
-      const r = recipes.find(item => item.id === id);
+    function openRecipeModal(id, currentServings, isFromLibrary = false) {
+      const pool = isFromLibrary ? chefLibrary : recipes;
+      const r = pool.find(item => item.id === id);
       if (!r) return;
 
       const scaledIngs = r.ingredients.map(i => scaleIngredient(i, r.servings, currentServings));
+
+      const actionButtons = isFromLibrary
+        ? `<button class="btn-secondary" style="flex:1;" onclick="saveLibraryRecipeToOwn(${r.id})">📖 Defterime Kaydet</button>
+           <button class="btn-secondary" style="flex:1;" onclick="addMissingToShopping(${r.id}, ${currentServings}, true)">🧺 Alışveriş Listesine Ekle</button>`
+        : `<button class="btn-secondary" style="flex:1;" onclick="addMissingToShopping(${r.id}, ${currentServings}, false)">🧺 Alışveriş Listesine Ekle</button>
+           <button class="btn-secondary" style="color:var(--danger);" onclick="deleteRecipe(${r.id})">Sil</button>`;
 
       document.getElementById('recipe-modal-body').innerHTML = `
         <span class="pill-badge">${r.category}</span>
@@ -833,9 +926,9 @@
         <div class="portion-box">
           <span style="font-size:13px; font-weight:600;">Porsiyon Hesapla:</span>
           <div class="portion-controls">
-            <button onclick="openRecipeModal(${r.id}, ${Math.max(1, currentServings - 1)})">-</button>
+            <button onclick="openRecipeModal(${r.id}, ${Math.max(1, currentServings - 1)}, ${isFromLibrary})">-</button>
             <strong style="margin:0 10px;">${currentServings} Kişilik</strong>
-            <button onclick="openRecipeModal(${r.id}, ${currentServings + 1})">+</button>
+            <button onclick="openRecipeModal(${r.id}, ${currentServings + 1}, ${isFromLibrary})">+</button>
           </div>
         </div>
 
@@ -848,12 +941,27 @@
         <p style="font-size:14px; line-height:1.55; white-space:pre-line; margin:0 0 16px;">${r.steps || 'Hazırlanış notu eklenmemiş.'}</p>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-secondary" style="flex:1;" onclick="addMissingToShopping(${r.id}, ${currentServings})">🧺 Alışveriş Listesine Ekle</button>
-          <button class="btn-secondary" style="color:var(--danger);" onclick="deleteRecipe(${r.id})">Sil</button>
+          ${actionButtons}
         </div>
         <button class="btn-primary" style="margin-top:10px;" onclick="closeModal('recipe-modal')">Kapat</button>
       `;
       document.getElementById('recipe-modal').classList.add('open');
+    }
+
+    function saveLibraryRecipeToOwn(id) {
+      const r = chefLibrary.find(item => item.id === id);
+      if (!r) return;
+      recipes.unshift({
+        id: Date.now(),
+        title: r.title,
+        category: r.category,
+        servings: r.servings,
+        source: "Şefin Önerisinden Eklendi",
+        ingredients: [...r.ingredients],
+        steps: r.steps
+      });
+      saveData();
+      alert(`"${r.title}" kendi tarif defterine kaydedildi!`);
     }
 
     function deleteRecipe(id) {
@@ -864,8 +972,9 @@
       renderRecipes();
     }
 
-    function addMissingToShopping(id, servings) {
-      const r = recipes.find(item => item.id === id);
+    function addMissingToShopping(id, servings, isFromLibrary = false) {
+      const pool = isFromLibrary ? chefLibrary : recipes;
+      const r = pool.find(item => item.id === id);
       if (!r) return;
       r.ingredients.forEach(ing => {
         const scaled = scaleIngredient(ing, r.servings, servings);
@@ -914,15 +1023,21 @@
       renderPantry();
     }
 
-    // BUGÜN NE PİŞİRSEM? (OTOMATİK TEKRAR DENEMELİ YAPAY ZEKA ŞEF)
+    // BUGÜN NE PİŞİRSEM? (KOTASIZ ANINDA EŞLEŞTİRME + TEK TUŞLA GEMİNİ)
     function loadFromPantryToCook() {
       const selected = pantry.filter(p => p.selected).map(p => p.name);
       document.getElementById('cook-ingredients').value = selected.join(', ');
     }
 
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    function copyPromptForAI(raw) {
+      const text = `Evimde şu malzemeler var: ${raw}. Bana Türk mutfağından bu malzemelerle yapabileceğim pratik ve lezzetli 3 yemek önerisi ve kısa tariflerini yazar mısın?`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      alert("Malzeme sorun panoya kopyalandı! Açılan sayfada sohbet kutusuna yapıştırıp anında sınırsız tarif alabilirsin.");
+    }
 
-    async function findMeals() {
+    function findMeals() {
       const raw = document.getElementById('cook-ingredients').value.trim();
       if (!raw) {
         alert("Lütfen elindeki malzemeleri yaz veya Malzemelerim sekmesinden seç.");
@@ -931,18 +1046,19 @@
 
       const userIngs = raw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
-      const matched = recipes.map(r => {
+      // 1. Kendi Tarif Defterinden Eşleşenler
+      const matchedOwn = recipes.map(r => {
         const recText = (r.title + ' ' + r.ingredients.join(' ')).toLowerCase();
-        const matchCount = userIngs.filter(u => recText.includes(u)).length;
+        const matchCount = userIngs.filter(u => recText.includes(u.split(' ')[0])).length;
         return { recipe: r, matchCount };
       }).filter(item => item.matchCount > 0).sort((a, b) => b.matchCount - a.matchCount);
 
       const ownArea = document.getElementById('matched-own-recipes');
-      if (matched.length > 0) {
+      if (matchedOwn.length > 0) {
         ownArea.innerHTML = `
           <h3 class="serif" style="font-style:italic; margin:16px 0 8px;">📖 Kendi Tarif Defterinden Eşleşenler</h3>
-          ${matched.map(m => `
-            <div class="card" onclick="openRecipeModal(${m.recipe.id}, ${m.recipe.servings})" style="cursor:pointer; border-left:4px solid var(--sage-main);">
+          ${matchedOwn.map(m => `
+            <div class="card" onclick="openRecipeModal(${m.recipe.id}, ${m.recipe.servings}, false)" style="cursor:pointer; border-left:4px solid var(--sage-main);">
               <div style="font-size:12px; color:var(--sage-main); font-weight:700;">${m.matchCount} malzemen uyuşuyor</div>
               <h4 class="serif" style="margin:4px 0; font-style:italic;">${m.recipe.title}</h4>
               <div style="font-size:12px; color:var(--text-muted);">${m.recipe.ingredients.join(', ')}</div>
@@ -953,69 +1069,38 @@
         ownArea.innerHTML = `<div class="card" style="font-size:13px; color:var(--text-muted);">Kayıtlı tariflerin arasında bu malzemelerle birebir eşleşen tarif bulunamadı.</div>`;
       }
 
-      const aiArea = document.getElementById('ai-suggestion-area');
-      const apiKey = (localStorage.getItem('mm_gemini_key') || '').trim();
+      // 2. Şefin Hazır Tarif Havuzundan Eşleşenler (Anında, kotasız)
+      const matchedLib = chefLibrary.map(r => {
+        const recText = (r.title + ' ' + r.ingredients.join(' ')).toLowerCase();
+        const matchCount = userIngs.filter(u => recText.includes(u.split(' ')[0])).length;
+        return { recipe: r, matchCount };
+      }).filter(item => item.matchCount > 0).sort((a, b) => b.matchCount - a.matchCount).slice(0, 5);
 
-      if (!apiKey) {
-        aiArea.innerHTML = `
-          <div class="card" style="background:#FFFDF7;">
-            <strong>🤖 Yapay Zeka Şef Önerisi İçin:</strong>
-            <p style="font-size:13px; color:var(--text-muted);">Sağ üstteki ⚙️ ayar simgesine dokunup ücretsiz Gemini API anahtarını eklersen, yapay zeka şefin kendi tariflerini de inceleyip sana özel yemek fikirleri önerebilir.</p>
+      const libArea = document.getElementById('chef-library-area');
+      const encodedPrompt = encodeURIComponent(`Evimde şu malzemeler var: ${raw}. Bana Türk mutfağından bu malzemelerle yapabileceğim pratik ve lezzetli 3 yemek önerisi ve kısa tariflerini yazar mısın?`);
+
+      libArea.innerHTML = `
+        <h3 class="serif" style="font-style:italic; margin:18px 0 8px;">👨‍🍳 Şefin Mutfak Önerileri (Dokun ve Tarifi Aç)</h3>
+        ${matchedLib.length > 0 ? matchedLib.map(m => `
+          <div class="card" onclick="openRecipeModal(${m.recipe.id}, ${m.recipe.servings}, true)" style="cursor:pointer; border-left:4px solid #C89F65;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; color:#9A723A; font-weight:700;">✨ ${m.matchCount} malzemenle uyumlu</span>
+              <span style="font-size:11px; color:var(--text-muted);">Tarifi Gör →</span>
+            </div>
+            <h4 class="serif" style="margin:4px 0; font-style:italic;">${m.recipe.title}</h4>
+            <div style="font-size:12px; color:var(--text-muted);">${m.recipe.ingredients.join(', ')}</div>
           </div>
-        `;
-        return;
-      }
+        `).join('') : '<div class="card" style="font-size:13px; color:var(--text-muted);">Bu malzemeler için aşağıdaki butondan sınırsız yapay zeka önerisi alabilirsin.</div>'}
 
-      aiArea.innerHTML = `<div class="card">✨ Şefin kendi tarif defterini inceliyor ve eldeki malzemelere göre öneriler hazırlıyor...</div>`;
-
-      const ownTitles = recipes.map(r => `${r.title} (${r.ingredients.join(', ')})`).join(' | ');
-
-      const prompt = `Sen Menekşe'nin mutfağındaki samimi, yaratıcı ve pratik Türk mutfağı şefisin.
-Menekşe'nin elindeki malzemeler: "${raw}".
-Menekşe'nin kendi kayıtlı tarif defterinde şu yemekler var: [${ownTitles}].
-
-Görevlerin:
-1. Öncelikle Menekşe'nin kendi tarif defterindeki yemeklerden bu malzemelerle yapılabilecek (veya ufak eklemeyle uyarlanabilecek) olan varsa önceliği ona vererek hatırlat.
-2. Ardından eldeki malzemelerle (evde tuz, yağ, salça, baharat gibi temel malzemelerin olduğunu varsayarak) yapabileceği 2 pratik ve lezzetli yeni yemek önerisi sun.
-3. Yanıtın sıcak, samimi, net ve maddeli olsun.`;
-
-      try {
-        let reply = "";
-        let lastErr = "";
-
-        for (let attempt = 1; attempt <= 4; attempt++) {
-          if (attempt > 1) {
-            aiArea.innerHTML = `<div class="card">⏳ Sunucu şu an çok yoğun, şefin bağlantısı tekrar deneniyor (${attempt}/4)...</div>`;
-            await sleep(2500);
-          }
-
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          });
-          const data = await res.json();
-
-          if (!data.error && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-            reply = data.candidates[0].content.parts[0].text;
-            break;
-          }
-          lastErr = data.error ? data.error.message : "Sunucudan yanıt alınamadı.";
-          // Eğer hata yoğunluk (high demand / 503 / overloaded) değilse döngüyü kır
-          if (!lastErr.toLowerCase().includes("high demand") && !lastErr.toLowerCase().includes("overloaded")) {
-            break;
-          }
-        }
-
-        if (!reply) throw new Error(lastErr);
-
-        aiArea.innerHTML = `
-          <h3 class="serif" style="font-style:italic; margin:16px 0 8px;">✨ Yapay Zeka Şefin Önerileri</h3>
-          <div class="ai-result-box">${reply}</div>
-        `;
-      } catch (err) {
-        aiArea.innerHTML = `<div class="card" style="color:var(--danger);">Yapay zeka bağlantısında bir hata oluştu: ${err.message}</div>`;
-      }
+        <div class="card" style="background:#F4F8F5; border-color:var(--sage-light); margin-top:16px;">
+          <strong style="font-size:14px; color:var(--sage-dark);">🤖 Daha Farklı Fikirler İster misin?</strong>
+          <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">Kota veya hata olmadan, elindeki malzemeleri tek dokunuşla doğrudan yapay zekaya sor:</p>
+          <div style="display:flex; gap:8px;">
+            <a href="https://gemini.google.com/app" target="_blank" onclick="copyPromptForAI('${raw.replace(/'/g, "")}')" class="btn-primary" style="text-align:center; text-decoration:none; flex:1;">✨ Gemini'ye Sor</a>
+            <a href="https://chatgpt.com/?q=${encodedPrompt}" target="_blank" class="btn-secondary" style="flex:1;">💬 ChatGPT'ye Sor</a>
+          </div>
+        </div>
+      `;
     }
 
     // HAFTALIK MENÜ
@@ -1081,20 +1166,17 @@ Görevlerin:
 
     // AYARLAR & MODAL
     function openSettings() {
-      document.getElementById('api-key-input').value = localStorage.getItem('mm_gemini_key') || '';
       document.getElementById('cloud-url-input').value = localStorage.getItem('mm_cloud_url') || '';
       document.getElementById('settings-modal').classList.add('open');
     }
 
     function saveSettings() {
-      const key = document.getElementById('api-key-input').value.trim();
       const cloudUrl = document.getElementById('cloud-url-input').value.trim();
-      localStorage.setItem('mm_gemini_key', key);
       localStorage.setItem('mm_cloud_url', cloudUrl);
       closeModal('settings-modal');
       if (cloudUrl) {
         syncFromCloud(false);
-        alert("Ayarlar kaydedildi ve Google E-Tablolar bulut senkronizasyonu aktif edildi!");
+        alert("Google E-Tablolar bulut senkronizasyonu aktif edildi!");
       } else {
         alert("Ayarlar kaydedildi!");
       }
