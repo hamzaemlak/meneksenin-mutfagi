@@ -531,7 +531,7 @@
       <h3 class="serif" style="margin-top:0;">Ayarlar ve Yedekleme</h3>
 
       <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">1. Yapay Zeka Şef (Gemini API Anahtarı)</label>
-      <input type="password" id="api-key-input" placeholder="AIzaSy... ile başlayan anahtar" />
+      <input type="password" id="api-key-input" placeholder="AQ... veya AIzaSy... ile başlayan anahtar" />
 
       <label style="font-size:13px; font-weight:600; display:block; margin:10px 0 4px;">2. Google E-Tablolar Otomatik Bulut Yedeği</label>
       <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px;">Tariflerin ve listelerin otomatik olarak Google Drive tablosuna yedeklenmesi için Web Uygulaması linkini yapıştır:</p>
@@ -667,7 +667,6 @@
           const localUpdated = parseInt(localStorage.getItem('mm_updated_at') || "0");
           const hasCustomLocal = localStorage.getItem('mm_recipes') !== null;
 
-          // Eğer telefon sıfırlanmışsa (yerel veri yoksa) veya manuel geri yükleme istendiyse ya da buluttaki veri daha yeniyse yükle
           if (manual || !hasCustomLocal || (data.updatedAt && data.updatedAt > localUpdated)) {
             recipes = data.recipes;
             pantry = data.pantry || pantry;
@@ -685,7 +684,6 @@
           }
           updateSyncStatus("☁️ Bulutla güncel");
         } else {
-          // Bulut boşsa mevcut tarifleri ilk kez buluta gönder
           syncToCloud();
         }
       } catch (e) {
@@ -916,7 +914,7 @@
       renderPantry();
     }
 
-    // BUGÜN NE PİŞİRSEM?
+    // BUGÜN NE PİŞİRSEM? (YEDEK MODELLİ YAPAY ZEKA ŞEF)
     function loadFromPantryToCook() {
       const selected = pantry.filter(p => p.selected).map(p => p.name);
       document.getElementById('cook-ingredients').value = selected.join(', ');
@@ -954,7 +952,7 @@
       }
 
       const aiArea = document.getElementById('ai-suggestion-area');
-      const apiKey = localStorage.getItem('mm_gemini_key');
+      const apiKey = (localStorage.getItem('mm_gemini_key') || '').trim();
 
       if (!apiKey) {
         aiArea.innerHTML = `
@@ -980,14 +978,26 @@ Görevlerin:
 3. Yanıtın sıcak, samimi, net ve maddeli olsun.`;
 
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
-        const reply = data.candidates[0].content.parts[0].text;
+        const models = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+        let reply = "";
+        let lastErr = "";
+
+        for (const m of models) {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          });
+          const data = await res.json();
+          if (!data.error && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            reply = data.candidates[0].content.parts[0].text;
+            break;
+          }
+          lastErr = data.error ? data.error.message : "Sunucudan yanıt alınamadı.";
+        }
+
+        if (!reply) throw new Error(lastErr);
+
         aiArea.innerHTML = `
           <h3 class="serif" style="font-style:italic; margin:16px 0 8px;">✨ Yapay Zeka Şefin Önerileri</h3>
           <div class="ai-result-box">${reply}</div>
