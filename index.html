@@ -58,6 +58,14 @@
       color: var(--sage-main);
       text-transform: uppercase;
     }
+    .sync-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
     .icon-btn {
       background: var(--card-white);
       border: 1px solid var(--border-soft);
@@ -349,6 +357,11 @@
       line-height: 1.55;
       margin-top: 14px;
     }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border-soft);
+      margin: 16px 0;
+    }
   </style>
 </head>
 <body>
@@ -357,9 +370,10 @@
   <div class="topbar">
     <div>
       <div class="brand-tag">MENEKŞE'NİN MUTFAĞI</div>
+      <div class="sync-badge" id="sync-status">💾 Yerel hafıza aktif</div>
     </div>
     <div style="display:flex; gap:8px;">
-      <button class="icon-btn" onclick="openSettings()" title="Yapay Zeka Ayarları">⚙️</button>
+      <button class="icon-btn" onclick="openSettings()" title="Ayarlar ve Yedekleme">⚙️</button>
     </div>
   </div>
 
@@ -407,7 +421,7 @@
         <div style="font-size:22px;">🤍</div>
         <div>
           <h4>Mutfağından güzel kokular eksik olmasın</h4>
-          <p>Bütün tariflerin, haftalık planların ve mutfak fikirlerin tek yerde, her an elinin altında.</p>
+          <p>Bütün tariflerin, haftalık planların ve mutfak fikirlerin hem telefonunda hem bulutta güvende.</p>
         </div>
       </div>
     </div>
@@ -478,10 +492,7 @@
         <button class="btn-primary" onclick="findMeals()">✨ Yemek Önerisi Bul</button>
       </div>
 
-      <!-- Kendi Tariflerinden Eşleşenler -->
       <div id="matched-own-recipes"></div>
-
-      <!-- Yapay Zeka Önerisi -->
       <div id="ai-suggestion-area"></div>
     </div>
 
@@ -514,14 +525,35 @@
     <div class="modal-content" id="recipe-modal-body"></div>
   </div>
 
-  <!-- Yapay Zeka Ayar Modalı -->
+  <!-- Ayarlar ve Yedekleme Modalı -->
   <div id="settings-modal" class="modal" onclick="if(event.target===this) closeModal('settings-modal')">
     <div class="modal-content">
-      <h3 class="serif" style="margin-top:0;">Yapay Zeka Şef Ayarı</h3>
-      <p style="font-size:13px; color:var(--text-muted);">"Bugün ne pişirsem?" özelliğinin kendi tariflerini analiz edip yeni yemek fikirleri üretebilmesi için ücretsiz Gemini API anahtarını buraya bir kez yapıştır.</p>
+      <h3 class="serif" style="margin-top:0;">Ayarlar ve Yedekleme</h3>
+
+      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">1. Yapay Zeka Şef (Gemini API Anahtarı)</label>
       <input type="password" id="api-key-input" placeholder="AIzaSy... ile başlayan anahtar" />
-      <button class="btn-primary" onclick="saveApiKey()">Anahtarı Kaydet</button>
-      <button class="btn-secondary" style="width:100%; margin-top:8px;" onclick="closeModal('settings-modal')">Kapat</button>
+
+      <label style="font-size:13px; font-weight:600; display:block; margin:10px 0 4px;">2. Google E-Tablolar Otomatik Bulut Yedeği</label>
+      <p style="font-size:12px; color:var(--text-muted); margin:0 0 6px;">Tariflerin ve listelerin otomatik olarak Google Drive tablosuna yedeklenmesi için Web Uygulaması linkini yapıştır:</p>
+      <input type="url" id="cloud-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
+
+      <button class="btn-primary" onclick="saveSettings()">Ayarları Kaydet ve Senkronize Et</button>
+
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="btn-secondary" style="flex:1;" onclick="syncFromCloud(true)">☁️ Buluttan Geri Yükle</button>
+        <button class="btn-secondary" style="flex:1;" onclick="syncToCloud()">☁️ Şimdi Buluta Yedekle</button>
+      </div>
+
+      <hr class="divider" />
+
+      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">3. Dosya Olarak Yedekle / Geri Yükle</label>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-secondary" style="flex:1;" onclick="downloadBackup()">📥 Yedeği İndir</button>
+        <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('backup-file-input').click()">📤 Yedek Yükle</button>
+        <input type="file" id="backup-file-input" accept=".json" style="display:none;" onchange="restoreBackup(event)" />
+      </div>
+
+      <button class="btn-secondary" style="width:100%; margin-top:16px; background:var(--bg-cream);" onclick="closeModal('settings-modal')">Kapat</button>
     </div>
   </div>
 
@@ -535,7 +567,6 @@
   </nav>
 
   <script>
-    // Başlangıç Örnek Verileri
     const defaultRecipes = [
       {
         id: 1,
@@ -575,7 +606,6 @@
 
     const daysOfWeek = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 
-    // State Yönetimi
     let recipes = JSON.parse(localStorage.getItem('mm_recipes')) || defaultRecipes;
     let pantry = JSON.parse(localStorage.getItem('mm_pantry')) || defaultPantry;
     let weekly = JSON.parse(localStorage.getItem('mm_weekly')) || {};
@@ -584,14 +614,131 @@
       { text: "Taze nane", done: false }
     ];
 
+    function updateSyncStatus(text) {
+      const el = document.getElementById('sync-status');
+      if (el) el.innerText = text;
+    }
+
     function saveData() {
       localStorage.setItem('mm_recipes', JSON.stringify(recipes));
       localStorage.setItem('mm_pantry', JSON.stringify(pantry));
       localStorage.setItem('mm_weekly', JSON.stringify(weekly));
       localStorage.setItem('mm_shopping', JSON.stringify(shopping));
+      localStorage.setItem('mm_updated_at', Date.now().toString());
+      syncToCloud();
     }
 
-    // Ekran Geçişi
+    // BULUT SENKRONİZASYON FONKSİYONLARI
+    async function syncToCloud() {
+      const cloudUrl = localStorage.getItem('mm_cloud_url');
+      if (!cloudUrl) return;
+      updateSyncStatus("☁️ Buluta yedekleniyor...");
+      try {
+        const payload = {
+          recipes,
+          pantry,
+          weekly,
+          shopping,
+          updatedAt: Date.now()
+        };
+        await fetch(cloudUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        updateSyncStatus("☁️ Bulutla güncel");
+      } catch (e) {
+        updateSyncStatus("⚠️ Çevrimdışı (telefonda kayıtlı)");
+      }
+    }
+
+    async function syncFromCloud(manual = false) {
+      const cloudUrl = localStorage.getItem('mm_cloud_url');
+      if (!cloudUrl) {
+        if (manual) alert("Lütfen önce yukarıdaki kutuya Google E-Tablolar Web Uygulaması linkini yapıştırıp kaydedin.");
+        return;
+      }
+      updateSyncStatus("☁️ Bulut kontrol ediliyor...");
+      try {
+        const res = await fetch(cloudUrl);
+        const data = await res.json();
+        if (data && !data.empty && data.recipes) {
+          const localUpdated = parseInt(localStorage.getItem('mm_updated_at') || "0");
+          const hasCustomLocal = localStorage.getItem('mm_recipes') !== null;
+
+          // Eğer telefon sıfırlanmışsa (yerel veri yoksa) veya manuel geri yükleme istendiyse ya da buluttaki veri daha yeniyse yükle
+          if (manual || !hasCustomLocal || (data.updatedAt && data.updatedAt > localUpdated)) {
+            recipes = data.recipes;
+            pantry = data.pantry || pantry;
+            weekly = data.weekly || weekly;
+            shopping = data.shopping || shopping;
+
+            localStorage.setItem('mm_recipes', JSON.stringify(recipes));
+            localStorage.setItem('mm_pantry', JSON.stringify(pantry));
+            localStorage.setItem('mm_weekly', JSON.stringify(weekly));
+            localStorage.setItem('mm_shopping', JSON.stringify(shopping));
+            localStorage.setItem('mm_updated_at', (data.updatedAt || Date.now()).toString());
+
+            renderRecipes();
+            if (manual) alert("Tüm tariflerin ve listelerin buluttan başarıyla geri yüklendi!");
+          }
+          updateSyncStatus("☁️ Bulutla güncel");
+        } else {
+          // Bulut boşsa mevcut tarifleri ilk kez buluta gönder
+          syncToCloud();
+        }
+      } catch (e) {
+        updateSyncStatus("💾 Yerel hafıza aktif");
+        if (manual) alert("Bulut bağlantısı kurulamadı. Linki doğru kopyaladığınızdan emin olun.");
+      }
+    }
+
+    // DOSYA OLARAK İNDİR / YÜKLE FONKSİYONLARI
+    function downloadBackup() {
+      const backupData = {
+        app: "MenekseninMutfagi",
+        date: new Date().toLocaleDateString("tr-TR"),
+        recipes,
+        pantry,
+        weekly,
+        shopping
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `menekse-mutfak-yedek-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function restoreBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.recipes) throw new Error("Geçersiz yedek dosyası.");
+          recipes = data.recipes;
+          pantry = data.pantry || pantry;
+          weekly = data.weekly || weekly;
+          shopping = data.shopping || shopping;
+          saveData();
+          renderRecipes();
+          closeModal('settings-modal');
+          alert("Yedek dosyası başarıyla yüklendi! Tüm tariflerin geri geldi.");
+        } catch (err) {
+          alert("Dosya okunamadı: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // EKRAN GEÇİŞİ
     function goScreen(name) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById('screen-' + name).classList.add('active');
@@ -665,7 +812,6 @@
       `).join('');
     }
 
-    // Porsiyon Oranlama ve Tarif Detayı
     function scaleIngredient(text, baseServings, targetServings) {
       const ratio = targetServings / baseServings;
       return text.replace(/^(\d+(?:[.,]\d+)?)/, (match) => {
@@ -731,7 +877,7 @@
       alert("Malzemeler alışveriş listene eklendi!");
     }
 
-    // MALZEMELERİM İŞLEMLERİ
+    // MALZEMELERİM
     function renderPantry() {
       const wrap = document.getElementById('pantry-chips');
       wrap.innerHTML = pantry.map((item, idx) => `
@@ -770,7 +916,7 @@
       renderPantry();
     }
 
-    // BUGÜN NE PİŞİRSEM? (ÖNCE KENDİ TARİFLERİ + SONRA YAPAY ZEKA)
+    // BUGÜN NE PİŞİRSEM?
     function loadFromPantryToCook() {
       const selected = pantry.filter(p => p.selected).map(p => p.name);
       document.getElementById('cook-ingredients').value = selected.join(', ');
@@ -785,7 +931,6 @@
 
       const userIngs = raw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
-      // 1. AŞAMA: Kendi Tarif Defterinde Eşleştirme
       const matched = recipes.map(r => {
         const recText = (r.title + ' ' + r.ingredients.join(' ')).toLowerCase();
         const matchCount = userIngs.filter(u => recText.includes(u)).length;
@@ -808,7 +953,6 @@
         ownArea.innerHTML = `<div class="card" style="font-size:13px; color:var(--text-muted);">Kayıtlı tariflerin arasında bu malzemelerle birebir eşleşen tarif bulunamadı.</div>`;
       }
 
-      // 2. AŞAMA: Yapay Zeka Önerisi (Kendi tariflerini de bilerek yorum yapar)
       const aiArea = document.getElementById('ai-suggestion-area');
       const apiKey = localStorage.getItem('mm_gemini_key');
 
@@ -917,14 +1061,22 @@ Görevlerin:
     // AYARLAR & MODAL
     function openSettings() {
       document.getElementById('api-key-input').value = localStorage.getItem('mm_gemini_key') || '';
+      document.getElementById('cloud-url-input').value = localStorage.getItem('mm_cloud_url') || '';
       document.getElementById('settings-modal').classList.add('open');
     }
 
-    function saveApiKey() {
+    function saveSettings() {
       const key = document.getElementById('api-key-input').value.trim();
+      const cloudUrl = document.getElementById('cloud-url-input').value.trim();
       localStorage.setItem('mm_gemini_key', key);
+      localStorage.setItem('mm_cloud_url', cloudUrl);
       closeModal('settings-modal');
-      alert("Yapay zeka anahtarı kaydedildi!");
+      if (cloudUrl) {
+        syncFromCloud(false);
+        alert("Ayarlar kaydedildi ve Google E-Tablolar bulut senkronizasyonu aktif edildi!");
+      } else {
+        alert("Ayarlar kaydedildi!");
+      }
     }
 
     function closeModal(id) {
@@ -933,6 +1085,7 @@ Görevlerin:
 
     // Başlangıç
     renderRecipes();
+    syncFromCloud(false);
   </script>
 </body>
 </html>
