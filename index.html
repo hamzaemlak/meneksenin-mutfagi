@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#F7F3EB" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>MENEKŞE'NİN MUTFAĞI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-cream: #F7F3EB;
+      --card-white: #FFFFFF;
+      --card-warm: #EFE8DC;
+      --sage-light: #DFEAE0;
+      --sage-main: #587A61;
+      --sage-dark: #3B5441;
+      --text-dark: #2C2925;
+      --text-muted: #6E685F;
+      --border-soft: #E6DFD3;
+      --danger: #C85A53;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-cream);
+      color: var(--text-dark);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding-bottom: 85px;
+    }
+
+    h1, h2, h3, .serif {
+      font-family: 'Lora', serif;
+    }
+
+    /* Üst Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px 8px;
+      position: sticky;
+      top: 0;
+      background: rgba(247, 243, 235, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 20;
+    }
+    .brand-tag {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      color: var(--sage-main);
+      text-transform: uppercase;
+    }
+    .icon-btn {
+      background: var(--card-white);
+      border: 1px solid var(--border-soft);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-dark);
+    }
+
+    .container {
+      padding: 0 20px;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* Ekran Geçişleri */
+    .screen { display: none; animation: fadeIn 0.2s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Karşılama */
+    .hero-title {
+      font-size: 32px;
+      font-style: italic;
+      font-weight: 700;
+      margin: 4px 0 4px;
+      color: var(--text-dark);
+    }
+    .hero-sub {
+      font-family: 'Lora', serif;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 15px;
+      margin: 0 0 18px;
+    }
+
+    /* Ana Öneri Kartı */
+    .featured-card {
+      background: var(--card-white);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(44, 41, 37, 0.04);
+      border: 1px solid var(--border-soft);
+      margin-bottom: 16px;
+    }
+    .pill-badge {
+      display: inline-block;
+      background: var(--sage-light);
+      color: var(--sage-dark);
+      font-size: 12px;
+      font-weight: 600;
+      font-style: italic;
+      font-family: 'Lora', serif;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .featured-card h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-style: italic;
+    }
+    .featured-card p {
+      margin: 0 0 16px;
+      color: var(--text-muted);
+      font-family: 'Lora', serif;
+      font-style: italic;
+      font-size: 14.5px;
+      line-height: 1.45;
+    }
+    .cta-sage {
+      width: 100%;
+      background: var(--sage-light);
+      color: var(--sage-dark);
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-family: 'Lora', serif;
+      font-weight: 700;
+      font-style: italic;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    /* 2x2 Grid Kartlar */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .menu-card {
+      background: var(--card-white);
+      border-radius: 20px;
+      padding: 18px 16px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 3px 14px rgba(44, 41, 37, 0.03);
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+    .menu-card:active { transform: scale(0.98); }
+    .menu-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg-cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: var(--sage-main);
+    }
+    .menu-card h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-style: italic;
+    }
+    .menu-card span {
+      font-family: 'Lora', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Alt Sıcak Mesaj Kartı */
+    .warm-banner {
+      background: var(--card-warm);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border: 1px solid var(--border-soft);
+    }
+    .warm-banner h4 {
+      margin: 0 0 6px;
+      font-family: 'Lora', serif;
+      font-style: italic;
+      font-size: 17px;
+    }
+    .warm-banner p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Form ve Butonlar */
+    .card {
+      background: var(--card-white);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--border-soft);
+      margin-bottom: 14px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-cream);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+      outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--sage-main); background: #fff; }
+    .btn-primary {
+      background: var(--sage-main);
+      color: #fff;
+      border: none;
+      padding: 13px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      width: 100%;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background: var(--sage-light);
+      color: var(--sage-dark);
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+    /* Etiketler / Malzeme Chipleri */
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .chip {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      background: var(--card-white);
+      border: 1px solid var(--border-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip.selected {
+      background: var(--sage-main);
+      color: #fff;
+      border-color: var(--sage-main);
+    }
+
+    /* Tarif Detay ve Porsiyon */
+    .portion-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-cream);
+      padding: 8px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+      justify-content: space-between;
+    }
+    .portion-controls button {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-soft);
+      background: #fff; font-weight: bold; cursor: pointer;
+    }
+
+    /* Alt Navigasyon */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 4px 12px;
+      z-index: 30;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      gap: 3px;
+    }
+    .nav-item.active { color: var(--sage-main); font-weight: 700; }
+    .nav-item span.ico { font-size: 18px; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(44,41,37,0.5);
+      z-index: 50;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal.open { display: flex; align-items: center; justify-content: center; }
+    .modal-content {
+      background: var(--card-white);
+      border-radius: 22px;
+      padding: 22px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .ai-result-box {
+      background: #F4F8F5;
+      border: 1px solid var(--sage-light);
+      border-radius: 16px;
+      padding: 16px;
+      white-space: pre-line;
+      font-size: 14px;
+      line-height: 1.55;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Üst Bar -->
+  <div class="topbar">
+    <div>
+      <div class="brand-tag">MENEKŞE'NİN MUTFAĞI</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" onclick="openSettings()" title="Yapay Zeka Ayarları">⚙️</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- 1. ANA SAYFA -->
+    <div id="screen-home" class="screen active">
+      <h1 class="hero-title">Merhaba! 🌿</h1>
+      <p class="hero-sub">Bugün mutfağımızda neler var?</p>
+
+      <div class="featured-card">
+        <span class="pill-badge">Günün önerisi</span>
+        <h2>Bugün ne pişirsem?</h2>
+        <p>Evdeki malzemelerini söyle, önce kendi tarif defterine bakalım, sonra sana nefis fikirler önerelim.</p>
+        <button class="cta-sage" onclick="goScreen('cook')">
+          <span>Yemek önerilerini keşfet</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <div class="grid-2">
+        <div class="menu-card" onclick="goScreen('recipes')">
+          <div class="menu-icon">📖</div>
+          <h3>Tariflerim</h3>
+          <span>Kendi tarif defterin</span>
+        </div>
+        <div class="menu-card" onclick="goScreen('pantry')">
+          <div class="menu-icon">🧊</div>
+          <h3>Malzemelerim</h3>
+          <span>Evde neler var?</span>
+        </div>
+        <div class="menu-card" onclick="goScreen('weekly')">
+          <div class="menu-icon">📅</div>
+          <h3>Haftalık menü</h3>
+          <span>Yemeklerini planla</span>
+        </div>
+        <div class="menu-card" onclick="goScreen('shopping')">
+          <div class="menu-icon">🧺</div>
+          <h3>Alışveriş listem</h3>
+          <span>Eksikleri tamamla</span>
+        </div>
+      </div>
+
+      <div class="warm-banner">
+        <div style="font-size:22px;">🤍</div>
+        <div>
+          <h4>Mutfağından güzel kokular eksik olmasın</h4>
+          <p>Bütün tariflerin, haftalık planların ve mutfak fikirlerin tek yerde, her an elinin altında.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TARİFLERİM -->
+    <div id="screen-recipes" class="screen">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 class="serif" style="font-style:italic; margin:0;">Tariflerim</h2>
+        <button class="btn-secondary" onclick="toggleAddRecipe()">+ Yeni Tarif</button>
+      </div>
+
+      <!-- Yeni Tarif Ekleme Formu -->
+      <div id="add-recipe-box" class="card" style="display:none;">
+        <h4 class="serif" style="margin-top:0;">Yeni Tarif Ekle</h4>
+        <input type="text" id="rec-title" placeholder="Yemeğin Adı (örn: Fırında Mücver)" />
+        <div style="display:flex; gap:8px;">
+          <select id="rec-cat">
+            <option value="Ana Yemek">Ana Yemek</option>
+            <option value="Çorba">Çorba</option>
+            <option value="Salata & Meze">Salata & Meze</option>
+            <option value="Hamur İşi & Kahvaltı">Hamur İşi & Kahvaltı</option>
+            <option value="Tatlı">Tatlı</option>
+          </select>
+          <input type="number" id="rec-servings" value="4" min="1" placeholder="Kaç Kişilik?" />
+        </div>
+        <input type="text" id="rec-source" placeholder="Kaynak / Link (İsteğe bağlı: İnternet linki veya 'Kendi Tarifim')" />
+        <textarea id="rec-ingredients" rows="4" placeholder="Malzemeler (Her satıra bir malzeme yazın, miktarları başa yazarsanız porsiyon otomatik hesaplanır. Örn:&#10;2 adet kabak&#10;3 yemek kaşığı un&#10;1 adet yumurta)"></textarea>
+        <textarea id="rec-steps" rows="4" placeholder="Yapılışı veya internetten kopyaladığınız tarif metni..."></textarea>
+        <button class="btn-primary" onclick="saveRecipe()">Tarifi Deftere Kaydet</button>
+      </div>
+
+      <input type="text" id="recipe-search" placeholder="Tarif veya malzeme ara..." oninput="renderRecipes()" />
+      <div id="recipe-list"></div>
+    </div>
+
+    <!-- 3. MALZEMELERİM -->
+    <div id="screen-pantry" class="screen">
+      <h2 class="serif" style="font-style:italic; margin-bottom:6px;">Malzemelerim</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Dolapta ve kilerde olan malzemeleri ekle veya seç. "Bugün ne pişirsem?" ekranı buradaki seçili malzemeleri kullanır.</p>
+
+      <div class="card">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="new-ing-input" placeholder="Yeni malzeme ekle (örn: Patlıcan, Krema)" style="margin:0;" onkeypress="if(event.key==='Enter') addPantryItem()" />
+          <button class="btn-primary" style="width:auto;" onclick="addPantryItem()">Ekle</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong style="font-size:14px;">Evdeki Malzemeler (Seçili olanlar mutfakta var)</strong>
+          <button class="btn-secondary btn-sm" onclick="clearSelectedPantry()">Seçimi Temizle</button>
+        </div>
+        <div id="pantry-chips" class="chip-wrap"></div>
+      </div>
+    </div>
+
+    <!-- 4. BUGÜN NE PİŞİRSEM? -->
+    <div id="screen-cook" class="screen">
+      <h2 class="serif" style="font-style:italic; margin-bottom:6px;">Bugün Ne Pişirsem?</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Malzemelerini seç veya yaz; önce kendi tarif defterine bakalım, ardından yapay zeka şefimiz senin için öneriler üretsin.</p>
+
+      <div class="card">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Elimdeki Malzemeler:</label>
+        <textarea id="cook-ingredients" rows="3" placeholder="Örn: tavuk göğsü, mantar, krema, sarımsak..."></textarea>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <button class="btn-secondary btn-sm" onclick="loadFromPantryToCook()">🧊 Malzemelerimden Aktar</button>
+        </div>
+        <button class="btn-primary" onclick="findMeals()">✨ Yemek Önerisi Bul</button>
+      </div>
+
+      <!-- Kendi Tariflerinden Eşleşenler -->
+      <div id="matched-own-recipes"></div>
+
+      <!-- Yapay Zeka Önerisi -->
+      <div id="ai-suggestion-area"></div>
+    </div>
+
+    <!-- 5. HAFTALIK MENÜ -->
+    <div id="screen-weekly" class="screen">
+      <h2 class="serif" style="font-style:italic; margin-bottom:6px;">Haftalık Menü</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Haftanın günlerine ne pişireceğini not et veya kayıtlı tariflerinden seç.</p>
+      <div id="weekly-list"></div>
+    </div>
+
+    <!-- 6. ALIŞVERİŞ LİSTEM -->
+    <div id="screen-shopping" class="screen">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 class="serif" style="font-style:italic; margin:0;">Alışveriş Listem</h2>
+        <button class="btn-secondary btn-sm" onclick="clearCheckedShopping()">Alınanları Sil</button>
+      </div>
+      <div class="card">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="shop-input" placeholder="Alınacak ürün (örn: 1 kg domates, tereyağı)" style="margin:0;" onkeypress="if(event.key==='Enter') addShoppingItem()" />
+          <button class="btn-primary" style="width:auto;" onclick="addShoppingItem()">Ekle</button>
+        </div>
+      </div>
+      <div id="shopping-list"></div>
+    </div>
+
+  </div>
+
+  <!-- Tarif Detay Modalı -->
+  <div id="recipe-modal" class="modal" onclick="if(event.target===this) closeModal('recipe-modal')">
+    <div class="modal-content" id="recipe-modal-body"></div>
+  </div>
+
+  <!-- Yapay Zeka Ayar Modalı -->
+  <div id="settings-modal" class="modal" onclick="if(event.target===this) closeModal('settings-modal')">
+    <div class="modal-content">
+      <h3 class="serif" style="margin-top:0;">Yapay Zeka Şef Ayarı</h3>
+      <p style="font-size:13px; color:var(--text-muted);">"Bugün ne pişirsem?" özelliğinin kendi tariflerini analiz edip yeni yemek fikirleri üretebilmesi için ücretsiz Gemini API anahtarını buraya bir kez yapıştır.</p>
+      <input type="password" id="api-key-input" placeholder="AIzaSy... ile başlayan anahtar" />
+      <button class="btn-primary" onclick="saveApiKey()">Anahtarı Kaydet</button>
+      <button class="btn-secondary" style="width:100%; margin-top:8px;" onclick="closeModal('settings-modal')">Kapat</button>
+    </div>
+  </div>
+
+  <!-- Alt Navigasyon -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="goScreen('home')"><span class="ico">🏠</span>Ana Sayfa</button>
+    <button class="nav-item" id="nav-recipes" onclick="goScreen('recipes')"><span class="ico">📖</span>Tarifler</button>
+    <button class="nav-item" id="nav-cook" onclick="goScreen('cook')"><span class="ico">✨</span>Ne Pişirsem</button>
+    <button class="nav-item" id="nav-weekly" onclick="goScreen('weekly')"><span class="ico">📅</span>Menü</button>
+    <button class="nav-item" id="nav-shopping" onclick="goScreen('shopping')"><span class="ico">🧺</span>Liste</button>
+  </nav>
+
+  <script>
+    // Başlangıç Örnek Verileri
+    const defaultRecipes = [
+      {
+        id: 1,
+        title: "Zeytinyağlı Taze Fasulye",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Kendi Tarifim",
+        ingredients: ["500 gr taze fasulye", "2 adet orta boy domates", "1 adet kuru soğan", "4 yemek kaşığı zeytinyağı", "1 tatlı kaşığı toz şeker", "1 çay kaşığı tuz"],
+        steps: "Soğanları yemeklik doğrayıp zeytinyağında pembeleştirin. Ayıklanmış fasulyeleri ekleyip rengi dönene kadar kavurun. Küp doğranmış domates, şeker, tuz ve yarım çay bardağı sıcak su ekleyip kısık ateşte 35 dakika pişirin."
+      },
+      {
+        id: 2,
+        title: "Kremalı Mantarlı Tavuk",
+        category: "Ana Yemek",
+        servings: 4,
+        source: "Kendi Tarifim",
+        ingredients: ["500 gr tavuk göğsü", "300 gr kültür mantarı", "1 paket sıvı krema", "2 diş sarımsak", "2 yemek kaşığı sıvı yağ", "1 çay kaşığı karabiber"],
+        steps: "Kuşbaşı doğranmış tavukları yüksek ateşte soteleyin. Dilimlenmiş mantarları ve sarımsağı ekleyip suyunu çekene kadar pişirin. Kremayı ve baharatları ekleyip 5 dakika daha kısık ateşte özleştirin."
+      }
+    ];
+
+    const defaultPantry = [
+      { name: "Domates", selected: true },
+      { name: "Soğan", selected: true },
+      { name: "Sarımsak", selected: true },
+      { name: "Yumurta", selected: true },
+      { name: "Patates", selected: false },
+      { name: "Tavuk Göğsü", selected: true },
+      { name: "Mantar", selected: true },
+      { name: "Krema", selected: false },
+      { name: "Pirinç", selected: true },
+      { name: "Bulgur", selected: true },
+      { name: "Kıyma", selected: false },
+      { name: "Kabak", selected: false },
+      { name: "Patlıcan", selected: false }
+    ];
+
+    const daysOfWeek = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+
+    // State Yönetimi
+    let recipes = JSON.parse(localStorage.getItem('mm_recipes')) || defaultRecipes;
+    let pantry = JSON.parse(localStorage.getItem('mm_pantry')) || defaultPantry;
+    let weekly = JSON.parse(localStorage.getItem('mm_weekly')) || {};
+    let shopping = JSON.parse(localStorage.getItem('mm_shopping')) || [
+      { text: "1 litre süt", done: false },
+      { text: "Taze nane", done: false }
+    ];
+
+    function saveData() {
+      localStorage.setItem('mm_recipes', JSON.stringify(recipes));
+      localStorage.setItem('mm_pantry', JSON.stringify(pantry));
+      localStorage.setItem('mm_weekly', JSON.stringify(weekly));
+      localStorage.setItem('mm_shopping', JSON.stringify(shopping));
+    }
+
+    // Ekran Geçişi
+    function goScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navBtn = document.getElementById('nav-' + name);
+      if (navBtn) navBtn.classList.add('active');
+
+      if (name === 'recipes') renderRecipes();
+      if (name === 'pantry') renderPantry();
+      if (name === 'cook') loadFromPantryToCook();
+      if (name === 'weekly') renderWeekly();
+      if (name === 'shopping') renderShopping();
+      window.scrollTo(0, 0);
+    }
+
+    // TARİFLERİM İŞLEMLERİ
+    function toggleAddRecipe() {
+      const box = document.getElementById('add-recipe-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveRecipe() {
+      const title = document.getElementById('rec-title').value.trim();
+      const category = document.getElementById('rec-cat').value;
+      const servings = parseInt(document.getElementById('rec-servings').value) || 4;
+      const source = document.getElementById('rec-source').value.trim() || "Kendi Tarifim";
+      const ingRaw = document.getElementById('rec-ingredients').value.trim();
+      const steps = document.getElementById('rec-steps').value.trim();
+
+      if (!title || !ingRaw) {
+        alert("Lütfen en azından yemek adını ve malzemelerini yazın.");
+        return;
+      }
+
+      const ingredients = ingRaw.split('\n').map(i => i.trim()).filter(Boolean);
+      recipes.unshift({ id: Date.now(), title, category, servings, source, ingredients, steps });
+      saveData();
+
+      document.getElementById('rec-title').value = '';
+      document.getElementById('rec-source').value = '';
+      document.getElementById('rec-ingredients').value = '';
+      document.getElementById('rec-steps').value = '';
+      toggleAddRecipe();
+      renderRecipes();
+    }
+
+    function renderRecipes() {
+      const q = (document.getElementById('recipe-search').value || '').toLowerCase();
+      const list = document.getElementById('recipe-list');
+      const filtered = recipes.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        r.ingredients.some(i => i.toLowerCase().includes(q))
+      );
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-muted);">Henüz eşleşen tarif bulunamadı.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(r => `
+        <div class="card" onclick="openRecipeModal(${r.id}, ${r.servings})" style="cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span class="pill-badge" style="margin-bottom:4px;">${r.category} • ${r.servings} Kişilik</span>
+              <h3 class="serif" style="margin:2px 0 4px; font-style:italic;">${r.title}</h3>
+              <div style="font-size:12px; color:var(--text-muted);">${r.ingredients.slice(0,3).join(', ')}...</div>
+            </div>
+            <span style="color:var(--sage-main); font-weight:bold;">→</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Porsiyon Oranlama ve Tarif Detayı
+    function scaleIngredient(text, baseServings, targetServings) {
+      const ratio = targetServings / baseServings;
+      return text.replace(/^(\d+(?:[.,]\d+)?)/, (match) => {
+        const num = parseFloat(match.replace(',', '.'));
+        const scaled = Math.round(num * ratio * 10) / 10;
+        return scaled;
+      });
+    }
+
+    function openRecipeModal(id, currentServings) {
+      const r = recipes.find(item => item.id === id);
+      if (!r) return;
+
+      const scaledIngs = r.ingredients.map(i => scaleIngredient(i, r.servings, currentServings));
+
+      document.getElementById('recipe-modal-body').innerHTML = `
+        <span class="pill-badge">${r.category}</span>
+        <h2 class="serif" style="font-style:italic; margin:4px 0;">${r.title}</h2>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Kaynak: ${r.source}</div>
+
+        <div class="portion-box">
+          <span style="font-size:13px; font-weight:600;">Porsiyon Hesapla:</span>
+          <div class="portion-controls">
+            <button onclick="openRecipeModal(${r.id}, ${Math.max(1, currentServings - 1)})">-</button>
+            <strong style="margin:0 10px;">${currentServings} Kişilik</strong>
+            <button onclick="openRecipeModal(${r.id}, ${currentServings + 1})">+</button>
+          </div>
+        </div>
+
+        <h4 class="serif" style="margin:12px 0 6px;">Malzemeler</h4>
+        <ul style="padding-left:18px; margin:0 0 12px; font-size:14px; line-height:1.6;">
+          ${scaledIngs.map(i => `<li>${i}</li>`).join('')}
+        </ul>
+
+        <h4 class="serif" style="margin:12px 0 6px;">Hazırlanışı</h4>
+        <p style="font-size:14px; line-height:1.55; white-space:pre-line; margin:0 0 16px;">${r.steps || 'Hazırlanış notu eklenmemiş.'}</p>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-secondary" style="flex:1;" onclick="addMissingToShopping(${r.id}, ${currentServings})">🧺 Alışveriş Listesine Ekle</button>
+          <button class="btn-secondary" style="color:var(--danger);" onclick="deleteRecipe(${r.id})">Sil</button>
+        </div>
+        <button class="btn-primary" style="margin-top:10px;" onclick="closeModal('recipe-modal')">Kapat</button>
+      `;
+      document.getElementById('recipe-modal').classList.add('open');
+    }
+
+    function deleteRecipe(id) {
+      if (!confirm("Bu tarifi silmek istediğinize emin misiniz?")) return;
+      recipes = recipes.filter(r => r.id !== id);
+      saveData();
+      closeModal('recipe-modal');
+      renderRecipes();
+    }
+
+    function addMissingToShopping(id, servings) {
+      const r = recipes.find(item => item.id === id);
+      if (!r) return;
+      r.ingredients.forEach(ing => {
+        const scaled = scaleIngredient(ing, r.servings, servings);
+        shopping.push({ text: `${scaled} (${r.title})`, done: false });
+      });
+      saveData();
+      alert("Malzemeler alışveriş listene eklendi!");
+    }
+
+    // MALZEMELERİM İŞLEMLERİ
+    function renderPantry() {
+      const wrap = document.getElementById('pantry-chips');
+      wrap.innerHTML = pantry.map((item, idx) => `
+        <div class="chip ${item.selected ? 'selected' : ''}" onclick="togglePantry(${idx})">
+          <span>${item.selected ? '✓' : '+'} ${item.name}</span>
+          <span onclick="event.stopPropagation(); removePantry(${idx})" style="opacity:0.6; margin-left:4px;">×</span>
+        </div>
+      `).join('');
+    }
+
+    function togglePantry(idx) {
+      pantry[idx].selected = !pantry[idx].selected;
+      saveData();
+      renderPantry();
+    }
+
+    function addPantryItem() {
+      const inp = document.getElementById('new-ing-input');
+      const val = inp.value.trim();
+      if (!val) return;
+      pantry.unshift({ name: val, selected: true });
+      inp.value = '';
+      saveData();
+      renderPantry();
+    }
+
+    function removePantry(idx) {
+      pantry.splice(idx, 1);
+      saveData();
+      renderPantry();
+    }
+
+    function clearSelectedPantry() {
+      pantry.forEach(p => p.selected = false);
+      saveData();
+      renderPantry();
+    }
+
+    // BUGÜN NE PİŞİRSEM? (ÖNCE KENDİ TARİFLERİ + SONRA YAPAY ZEKA)
+    function loadFromPantryToCook() {
+      const selected = pantry.filter(p => p.selected).map(p => p.name);
+      document.getElementById('cook-ingredients').value = selected.join(', ');
+    }
+
+    async function findMeals() {
+      const raw = document.getElementById('cook-ingredients').value.trim();
+      if (!raw) {
+        alert("Lütfen elindeki malzemeleri yaz veya Malzemelerim sekmesinden seç.");
+        return;
+      }
+
+      const userIngs = raw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+      // 1. AŞAMA: Kendi Tarif Defterinde Eşleştirme
+      const matched = recipes.map(r => {
+        const recText = (r.title + ' ' + r.ingredients.join(' ')).toLowerCase();
+        const matchCount = userIngs.filter(u => recText.includes(u)).length;
+        return { recipe: r, matchCount };
+      }).filter(item => item.matchCount > 0).sort((a, b) => b.matchCount - a.matchCount);
+
+      const ownArea = document.getElementById('matched-own-recipes');
+      if (matched.length > 0) {
+        ownArea.innerHTML = `
+          <h3 class="serif" style="font-style:italic; margin:16px 0 8px;">📖 Kendi Tarif Defterinden Eşleşenler</h3>
+          ${matched.map(m => `
+            <div class="card" onclick="openRecipeModal(${m.recipe.id}, ${m.recipe.servings})" style="cursor:pointer; border-left:4px solid var(--sage-main);">
+              <div style="font-size:12px; color:var(--sage-main); font-weight:700;">${m.matchCount} malzemen uyuşuyor</div>
+              <h4 class="serif" style="margin:4px 0; font-style:italic;">${m.recipe.title}</h4>
+              <div style="font-size:12px; color:var(--text-muted);">${m.recipe.ingredients.join(', ')}</div>
+            </div>
+          `).join('')}
+        `;
+      } else {
+        ownArea.innerHTML = `<div class="card" style="font-size:13px; color:var(--text-muted);">Kayıtlı tariflerin arasında bu malzemelerle birebir eşleşen tarif bulunamadı.</div>`;
+      }
+
+      // 2. AŞAMA: Yapay Zeka Önerisi (Kendi tariflerini de bilerek yorum yapar)
+      const aiArea = document.getElementById('ai-suggestion-area');
+      const apiKey = localStorage.getItem('mm_gemini_key');
+
+      if (!apiKey) {
+        aiArea.innerHTML = `
+          <div class="card" style="background:#FFFDF7;">
+            <strong>🤖 Yapay Zeka Şef Önerisi İçin:</strong>
+            <p style="font-size:13px; color:var(--text-muted);">Sağ üstteki ⚙️ ayar simgesine dokunup ücretsiz Gemini API anahtarını eklersen, yapay zeka şefin kendi tariflerini de inceleyip sana özel yemek fikirleri önerebilir.</p>
+          </div>
+        `;
+        return;
+      }
+
+      aiArea.innerHTML = `<div class="card">✨ Şefin kendi tarif defterini inceliyor ve eldeki malzemelere göre öneriler hazırlıyor...</div>`;
+
+      const ownTitles = recipes.map(r => `${r.title} (${r.ingredients.join(', ')})`).join(' | ');
+
+      const prompt = `Sen Menekşe'nin mutfağındaki samimi, yaratıcı ve pratik Türk mutfağı şefisin.
+Menekşe'nin elindeki malzemeler: "${raw}".
+Menekşe'nin kendi kayıtlı tarif defterinde şu yemekler var: [${ownTitles}].
+
+Görevlerin:
+1. Öncelikle Menekşe'nin kendi tarif defterindeki yemeklerden bu malzemelerle yapılabilecek (veya ufak eklemeyle uyarlanabilecek) olan varsa önceliği ona vererek hatırlat.
+2. Ardından eldeki malzemelerle (evde tuz, yağ, salça, baharat gibi temel malzemelerin olduğunu varsayarak) yapabileceği 2 pratik ve lezzetli yeni yemek önerisi sun.
+3. Yanıtın sıcak, samimi, net ve maddeli olsun.`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+        const reply = data.candidates[0].content.parts[0].text;
+        aiArea.innerHTML = `
+          <h3 class="serif" style="font-style:italic; margin:16px 0 8px;">✨ Yapay Zeka Şefin Önerileri</h3>
+          <div class="ai-result-box">${reply}</div>
+        `;
+      } catch (err) {
+        aiArea.innerHTML = `<div class="card" style="color:var(--danger);">Yapay zeka bağlantısında bir hata oluştu: ${err.message}</div>`;
+      }
+    }
+
+    // HAFTALIK MENÜ
+    function renderWeekly() {
+      const wrap = document.getElementById('weekly-list');
+      wrap.innerHTML = daysOfWeek.map(day => `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong class="serif" style="font-style:italic; font-size:16px;">${day}</strong>
+            <select style="width:auto; margin:0; padding:6px 10px; font-size:12px;" onchange="if(this.value) setWeeklyMeal('${day}', this.value)">
+              <option value="">Tarif Seç...</option>
+              ${recipes.map(r => `<option value="${r.title}">${r.title}</option>`).join('')}
+            </select>
+          </div>
+          <input type="text" value="${weekly[day] || ''}" placeholder="Örn: Mercimek çorbası, Pilav..." style="margin:0;" onchange="setWeeklyMeal('${day}', this.value)" />
+        </div>
+      `).join('');
+    }
+
+    function setWeeklyMeal(day, val) {
+      weekly[day] = val;
+      saveData();
+      renderWeekly();
+    }
+
+    // ALIŞVERİŞ LİSTESİ
+    function renderShopping() {
+      const wrap = document.getElementById('shopping-list');
+      if (shopping.length === 0) {
+        wrap.innerHTML = `<div class="card" style="text-align:center; color:var(--text-muted);">Alışveriş listen şu an boş.</div>`;
+        return;
+      }
+      wrap.innerHTML = shopping.map((item, idx) => `
+        <div class="card" style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px;" onclick="toggleShopping(${idx})">
+          <span style="text-decoration:${item.done ? 'line-through' : 'none'}; color:${item.done ? 'var(--text-muted)' : 'var(--text-dark)'};">
+            ${item.done ? '✅' : '⬜'} ${item.text}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function addShoppingItem() {
+      const inp = document.getElementById('shop-input');
+      const val = inp.value.trim();
+      if (!val) return;
+      shopping.unshift({ text: val, done: false });
+      inp.value = '';
+      saveData();
+      renderShopping();
+    }
+
+    function toggleShopping(idx) {
+      shopping[idx].done = !shopping[idx].done;
+      saveData();
+      renderShopping();
+    }
+
+    function clearCheckedShopping() {
+      shopping = shopping.filter(s => !s.done);
+      saveData();
+      renderShopping();
+    }
+
+    // AYARLAR & MODAL
+    function openSettings() {
+      document.getElementById('api-key-input').value = localStorage.getItem('mm_gemini_key') || '';
+      document.getElementById('settings-modal').classList.add('open');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('api-key-input').value.trim();
+      localStorage.setItem('mm_gemini_key', key);
+      closeModal('settings-modal');
+      alert("Yapay zeka anahtarı kaydedildi!");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    // Başlangıç
+    renderRecipes();
+  </script>
+</body>
+</html>
