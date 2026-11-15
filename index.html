@@ -914,11 +914,13 @@
       renderPantry();
     }
 
-    // BUGÜN NE PİŞİRSEM? (YEDEK MODELLİ YAPAY ZEKA ŞEF)
+    // BUGÜN NE PİŞİRSEM? (OTOMATİK TEKRAR DENEMELİ YAPAY ZEKA ŞEF)
     function loadFromPantryToCook() {
       const selected = pantry.filter(p => p.selected).map(p => p.name);
       document.getElementById('cook-ingredients').value = selected.join(', ');
     }
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     async function findMeals() {
       const raw = document.getElementById('cook-ingredients').value.trim();
@@ -978,22 +980,31 @@ Görevlerin:
 3. Yanıtın sıcak, samimi, net ve maddeli olsun.`;
 
       try {
-        const models = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
         let reply = "";
         let lastErr = "";
 
-        for (const m of models) {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`, {
+        for (let attempt = 1; attempt <= 4; attempt++) {
+          if (attempt > 1) {
+            aiArea.innerHTML = `<div class="card">⏳ Sunucu şu an çok yoğun, şefin bağlantısı tekrar deneniyor (${attempt}/4)...</div>`;
+            await sleep(2500);
+          }
+
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
           });
           const data = await res.json();
+
           if (!data.error && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
             reply = data.candidates[0].content.parts[0].text;
             break;
           }
           lastErr = data.error ? data.error.message : "Sunucudan yanıt alınamadı.";
+          // Eğer hata yoğunluk (high demand / 503 / overloaded) değilse döngüyü kır
+          if (!lastErr.toLowerCase().includes("high demand") && !lastErr.toLowerCase().includes("overloaded")) {
+            break;
+          }
         }
 
         if (!reply) throw new Error(lastErr);
