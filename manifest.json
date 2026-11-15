@@ -1,0 +1,15 @@
+{
+  "name": "MENEKŞE'NİN MUTFAĞI",
+  "short_name": "Menekşe Mutfak",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F7F3EB",
+  "theme_color": "#587A61",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1830/1830839.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
